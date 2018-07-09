@@ -7,6 +7,7 @@ defmodule LoginTest do
     {:ok, [options: [database: "postgrex_test", backoff_type: :stop]]}
   end
 
+  @tag min_crdb_version: nil
   test "login cleartext password", context do
     Process.flag(:trap_exit, true)
     opts = [username: "postgrex_cleartext_pw", password: "postgrex_cleartext_pw"]
@@ -14,6 +15,7 @@ defmodule LoginTest do
     assert {:ok, %Postgrex.Result{}} = P.query(pid, "SELECT 123", [])
   end
 
+  @tag min_crdb_version: nil
   test "login cleartext password failure", context do
     Process.flag(:trap_exit, true)
     opts = [username: "postgrex_cleartext_pw", password: "wrong_password"]
@@ -24,6 +26,7 @@ defmodule LoginTest do
     end
   end
 
+  @tag min_crdb_version: nil
   test "login md5 password", context do
     Process.flag(:trap_exit, true)
     opts = [username: "postgrex_md5_pw", password: "postgrex_md5_pw"]
@@ -31,6 +34,7 @@ defmodule LoginTest do
     assert {:ok, %Postgrex.Result{}} = P.query(pid, "SELECT 123", [])
   end
 
+  @tag min_crdb_version: nil
   test "login md5 password failure", context do
     Process.flag(:trap_exit, true)
     opts = [username: "postgrex_md5_pw", password: "wrong_password"]

@@ -3,6 +3,7 @@ defmodule AlterTest do
   import Postgrex.TestHelper
 
   @moduletag :capture_log
+  @moduletag min_crdb_version: nil
 
   setup context do
     options = [database: "postgrex_test", backoff_type: :stop,

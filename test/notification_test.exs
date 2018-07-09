@@ -4,6 +4,8 @@ defmodule NotificationTest do
   alias Postgrex, as: P
   alias Postgrex.Notifications, as: PN
 
+  @moduletag min_crdb_version: nil
+
   @opts [database: "postgrex_test", sync_connect: true]
 
   setup do

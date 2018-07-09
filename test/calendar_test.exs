@@ -13,49 +13,59 @@ defmodule CalendarTest do
     assert [[~T[00:00:00.000000]]] = query("SELECT time '00:00:00'", [])
     assert [[~T[01:02:03.000000]]] = query("SELECT time '01:02:03'", [])
     assert [[~T[23:59:59.000000]]] = query("SELECT time '23:59:59'", [])
-    assert [[~T[04:05:06.000000]]] = query("SELECT time '04:05:06 PST'", [])
-    assert [[~T[04:05:06.000000]]] = query("SELECT time '04:05:06-8'", [])
-    assert [[~T[04:05:06.000000]]] = query("SELECT time '04:05:06-8'", [])
 
     assert [[~T[00:00:00.123000]]] = query("SELECT time '00:00:00.123'", [])
     assert [[~T[00:00:00.123456]]] = query("SELECT time '00:00:00.123456'", [])
     assert [[~T[01:02:03.123456]]] = query("SELECT time '01:02:03.123456'", [])
   end
 
+  @tag min_crdb_version: nil
+  test "decode non-UTC time", context do
+    assert [[~T[04:05:06.000000]]] = query("SELECT time '04:05:06-8'", [])
+    assert [[~T[04:05:06.000000]]] = query("SELECT time '04:05:06-8'", [])
+    assert [[~T[04:05:06.000000]]] = query("SELECT time '04:05:06 PST'", [])
+  end
+
   test "decode timetz", context do
     assert [[~T[00:00:00.000000]]] = query("SELECT time with time zone '00:00:00 UTC'", [])
     assert [[~T[01:02:03.000000]]] = query("SELECT time with time zone '01:02:03 UTC'", [])
-    assert [[~T[23:00:00.000000]]] = query("SELECT time with time zone '00:00:00+1'", [])
-    assert [[~T[01:00:00.000000]]] = query("SELECT time with time zone '23:00:00-2'", [])
 
     assert :ok = query("SET SESSION TIME ZONE UTC", [])
-
     assert [[~T[23:59:59.000000]]] = query("SELECT time with time zone '23:59:59'", [])
-    assert [[~T[12:05:06.000000]]] = query("SELECT time with time zone '04:05:06 PST'", [])
-    assert [[~T[12:05:06.000000]]] = query("SELECT time with time zone '04:05:06-8'", [])
-
     assert [[~T[00:00:00.123000]]] = query("SELECT time with time zone '00:00:00.123'", [])
     assert [[~T[00:00:00.123456]]] = query("SELECT time with time zone '00:00:00.123456 UTC'", [])
     assert [[~T[01:02:03.123456]]] = query("SELECT time with time zone '01:02:03.123456'", [])
 
-    assert [[~T[01:02:03.123456]]] = query("SELECT time with time zone '16:01:03.123456+1459'", [])
+    assert :ok = query("SET SESSION TIME ZONE +1", [])
+    assert [[~T[01:02:03.123456]]] = query("SELECT time with time zone '01:02:03.123456 UTC'", [])
+  end
 
+  @tag min_crdb_version: nil
+  test "decode non-UTC timetz", context do
+    assert [[~T[23:00:00.000000]]] = query("SELECT time with time zone '00:00:00+1'", [])
+    assert [[~T[01:00:00.000000]]] = query("SELECT time with time zone '23:00:00-2'", [])
+
+    assert :ok = query("SET SESSION TIME ZONE UTC", [])
+    assert [[~T[12:05:06.000000]]] = query("SELECT time with time zone '04:05:06-8'", [])
+    assert [[~T[12:05:06.000000]]] = query("SELECT time with time zone '04:05:06 PST'", [])
+    assert [[~T[01:02:03.123456]]] = query("SELECT time with time zone '16:01:03.123456+1459'", [])
     assert [[~T[16:01:03.123456]]] = query("SELECT time with time zone '01:02:03.123456-1459'", [])
 
     assert :ok = query("SET SESSION TIME ZONE +1", [])
-
-    assert [[~T[12:05:06.000000]]] = query("SELECT time with time zone '04:05:06 PST'", [])
     assert [[~T[12:05:06.000000]]] = query("SELECT time with time zone '04:05:06-8'", [])
-    assert [[~T[01:02:03.123456]]] = query("SELECT time with time zone '01:02:03.123456 UTC'", [])
+    assert [[~T[12:05:06.000000]]] = query("SELECT time with time zone '04:05:06 PST'", [])
   end
 
   test "decode date", context do
     assert [[~D[0001-01-01]]] = query("SELECT date '0001-01-01'", [])
     assert [[~D[0001-02-03]]] = query("SELECT date '0001-02-03'", [])
     assert [[~D[2013-09-23]]] = query("SELECT date '2013-09-23'", [])
-
-    assert [[~D[0000-01-01]]] = query("SELECT date 'January 1, 1 BC'", [])
     assert [[~D[9999-12-31]]] = query("SELECT date '9999-12-31'", [])
+  end
+
+  @tag min_crdb_version: nil
+  test "decode Month Day, Year date", context do
+    assert [[~D[0000-01-01]]] = query("SELECT date 'January 1, 1 BC'", [])
   end
 
   test "decode date lower bound error", context do
@@ -78,18 +88,21 @@ defmodule CalendarTest do
     assert [[~N[2013-09-23 14:04:37.123000]]] =
       query("SELECT timestamp '2013-09-23 14:04:37.123'", [])
 
-    assert [[~N[2013-09-23 14:04:37.000000]]] =
-      query("SELECT timestamp '2013-09-23 14:04:37 PST'", [])
+    assert [[~N[1980-01-01 00:00:00.123456]]] =
+      query("SELECT timestamp '1980-01-01 00:00:00.123456'", [])
+  end
 
+  @tag min_crdb_version: nil
+  test "decode non-UTC timestamp", context do
     assert [[~N[2013-09-23 14:04:37.000000]]] =
       query("SELECT timestamp '2013-09-23 14:04:37-8'", [])
+
+    assert [[~N[2013-09-23 14:04:37.000000]]] =
+      query("SELECT timestamp '2013-09-23 14:04:37 PST'", [])
 
     assert :ok = query("SET SESSION TIME ZONE +1", [])
     assert [[~N[2013-09-23 14:04:37.000000]]] =
       query("SELECT timestamp '2013-09-23 14:04:37 PST'", [])
-
-    assert [[~N[1980-01-01 00:00:00.123456]]] =
-      query("SELECT timestamp '1980-01-01 00:00:00.123456'", [])
   end
 
   test "decode timestamptz", context do

@@ -123,6 +123,7 @@ defmodule TransactionTest do
     assert query("SELECT 42", []) == [[42]]
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :savepoint
   test "savepoint transaction releases savepoint", context do
     :ok = query("BEGIN", [])
@@ -136,6 +137,7 @@ defmodule TransactionTest do
     assert :ok = query("ROLLBACK", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :savepoint
   test "savepoint transaction rolls back to savepoint and releases", context do
     assert :ok = query("BEGIN", [])
@@ -150,6 +152,7 @@ defmodule TransactionTest do
     assert :ok = query("ROLLBACK", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :savepoint
   @tag prepare: :unnamed
   test "savepoint transaction releases with unnamed queries", context do
@@ -164,6 +167,7 @@ defmodule TransactionTest do
     assert :ok = query("ROLLBACK", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :savepoint
   @tag prepare: :unnamed
   test "savepoint transaction rolls back and releases with unnamed queries", context do
@@ -177,6 +181,7 @@ defmodule TransactionTest do
     assert :ok = query("ROLLBACK", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :savepoint
   test "savepoint transaction rollbacks on failed", context do
     assert :ok = query("BEGIN", [])
@@ -192,6 +197,7 @@ defmodule TransactionTest do
     assert :ok = query("ROLLBACK", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :savepoint
   @tag prepare: :unnamed
   test "savepoint transaction rollbacks on failed with unnamed queries", context do
@@ -205,6 +211,7 @@ defmodule TransactionTest do
     assert :ok = query("ROLLBACK", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "transaction works after execute failure in savepoint query", context do
     assert transaction(fn(conn) ->
@@ -218,6 +225,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "transaction works after parse failure in savepoint query", context do
     assert transaction(fn(conn) ->
@@ -232,6 +240,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "transaction works after parse failure in savepoint prepare", context do
     assert transaction(fn(conn) ->
@@ -250,6 +259,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "savepoint query releases savepoint in transaction", context do
     assert transaction(fn(conn) ->
@@ -264,6 +274,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "savepoint query does not rollback on savepoint error", context do
     assert transaction(fn(conn) ->
@@ -284,6 +295,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "savepoint query disconnects on release savepoint error", context do
     assert transaction(fn(conn) ->
@@ -297,6 +309,7 @@ defmodule TransactionTest do
     end) == {:error, :oops}
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "savepoint query rolls back and releases savepoint in transaction", context do
     assert transaction(fn(conn) ->
@@ -311,6 +324,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   @tag prepare: :unnamed
   test "unnamed savepoint query releases savepoint in transaction", context do
@@ -326,6 +340,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "unnamed savepoint query rolls back and releases savepoint in transaction", context do
     assert transaction(fn(conn) ->
@@ -340,6 +355,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "transaction works after failure in savepoint query binding state", context do
     assert transaction(fn(conn) ->
@@ -354,6 +370,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   test "transaction works after failure in savepoint query executing state", context do
     assert transaction(fn(conn) ->
@@ -367,6 +384,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   @tag prepare: :unnamed
   test "transaction works after failure in unammed savepoint query parsing state", context do
@@ -381,6 +399,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   @tag prepare: :unnamed
   test "transaction works after failure in unnamed savepoint query binding state", context do
@@ -396,6 +415,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :transaction
   @tag prepare: :unnamed
   test "transaction works after failure in unnamed savepoint query executing state", context do
@@ -410,6 +430,7 @@ defmodule TransactionTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :savepoint
   test "savepoint transaction works after failure in savepoint query parsing state", context do
     assert :ok = query("BEGIN", [])
@@ -425,6 +446,7 @@ defmodule TransactionTest do
     assert :ok = query("ROLLBACK", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :savepoint
   test "savepoint transaction works after failure in savepoint query binding state", context do
     assert :ok = query("BEGIN", [])
@@ -441,6 +463,7 @@ defmodule TransactionTest do
     assert :ok = query("ROLLBACK", [])
   end
 
+  @tag min_crdb_version: nil
   @tag mode: :savepoint
   test "savepoint transaction works after failure in savepoint query executing state", context do
     assert :ok = query("BEGIN", [])

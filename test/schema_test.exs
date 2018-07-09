@@ -3,6 +3,8 @@ defmodule SchemaTest do
   import Postgrex.TestHelper
   alias Postgrex, as: P
 
+  @moduletag min_crdb_version: nil
+
   setup do
     opts = [ database: "postgrex_test_with_schemas" ]
     {:ok, pid} = P.start_link(opts)

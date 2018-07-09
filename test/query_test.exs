@@ -58,13 +58,19 @@ defmodule QueryTest do
   end
 
   test "decode arrays", context do
-    assert [[[]]] = query("SELECT ARRAY[]::integer[]", [])
     assert [[[1]]] = query("SELECT ARRAY[1]", [])
     assert [[[1,2]]] = query("SELECT ARRAY[1,2]", [])
     assert [[[[0],[1]]]] = query("SELECT ARRAY[[0],[1]]", [])
     assert [[[[0]]]] = query("SELECT ARRAY[ARRAY[0]]", [])
   end
 
+  # https://github.com/cockroachdb/cockroach/issues/18420
+  @tag min_crdb_version: nil
+  test "decode empty arrays", context do
+    assert [[[]]] = query("SELECT ARRAY[]::integer[]", [])
+  end
+
+  @tag min_crdb_version: nil
   test "decode array domain", context do
     assert [[[1.0, 2.0, 3.0]]] =
            query("SELECT ARRAY[1, 2, 3]::floats_domain", [])
@@ -73,6 +79,7 @@ defmodule QueryTest do
            query("SELECT ARRAY[point '1,1', point '2,2', point '3,3']::points_domain", [])
   end
 
+  @tag min_crdb_version: nil
   test "encode array domain", context do
     floats = [1.0, 2.0, 3.0]
     floats_string = "{1,2,3}"
@@ -96,14 +103,17 @@ defmodule QueryTest do
            query("SELECT interval '1 year 2 months 40 days 3 hours 2 minutes'", [])
   end
 
+  @tag min_crdb_version: nil
   test "decode point", context do
     assert [[%Postgrex.Point{x: -97.5, y: 100.1}]] == query("SELECT point(-97.5, 100.1)::point", [])
   end
 
+  @tag min_crdb_version: nil
   test "encode point", context do
     assert [[%Postgrex.Point{x: -97.0, y: 100.0}]] == query("SELECT $1::point", [%Postgrex.Point{x: -97, y: 100}])
   end
 
+  @tag min_crdb_version: nil
  test "decode polygon", context do
     p1 = %Postgrex.Point{x: 100.0, y: 101.5}
     p2 = %Postgrex.Point{x: 100.0, y: -99.1}
@@ -114,6 +124,7 @@ defmodule QueryTest do
     assert [[polygon]] == query("SELECT '#{polystring}'" <> "::polygon", [])
   end
 
+  @tag min_crdb_version: nil
   test "encode polygon", context do
     p1 = %Postgrex.Point{x: 100.0, y: 101.5}
     p2 = %Postgrex.Point{x: 100.0, y: -99.1}
@@ -126,6 +137,7 @@ defmodule QueryTest do
     assert %ArgumentError{} = catch_error(query("SELECT $1::polygon", [bad_polygon]))
   end
 
+  @tag min_crdb_version: nil
   @tag min_pg_version: "9.4"
   test "decode line", context do
     # 98.6x - y = 0 <=> y = 98.6x
@@ -134,6 +146,7 @@ defmodule QueryTest do
     assert [[line]] == query("SELECT '(0.0,0.0),(1.0,98.6)'::line", [])
   end
 
+  @tag min_crdb_version: nil
   @tag min_pg_version: "9.4"
   test "encode line", context do
     # 98.6x - y = 0 <=> y = 98.6x
@@ -144,6 +157,7 @@ defmodule QueryTest do
     assert %ArgumentError{} = catch_error(query("SELECT $1::line", [bad_line]))
   end
 
+  @tag min_crdb_version: nil
   test "decode line segment", context do
     segment = %Postgrex.LineSegment{
       point1: %Postgrex.Point{x: 0.0,  y: 0.0},
@@ -152,6 +166,7 @@ defmodule QueryTest do
     assert [[segment]] == query("SELECT '(0.0,0.0)(1.0,1.0)'::lseg", [])
   end
 
+  @tag min_crdb_version: nil
   test "encode line segment", context do
     segment = %Postgrex.LineSegment{
       point1: %Postgrex.Point{x: 0.0,  y: 0.0},
@@ -163,6 +178,7 @@ defmodule QueryTest do
       catch_error(query("SELECT $1::lseg", [%Postgrex.LineSegment{}]))
   end
 
+  @tag min_crdb_version: nil
   test "decode box", context do
     box = %Postgrex.Box{
       upper_right: %Postgrex.Point{x: 1.0,  y: 1.0},
@@ -175,6 +191,7 @@ defmodule QueryTest do
     assert [[box]] == query("SELECT '(0.0,1.0)(1.0,0.0)'::box", [])
   end
 
+  @tag min_crdb_version: nil
   test "encode box", context do
     box = %Postgrex.Box{
       upper_right: %Postgrex.Point{x: 1.0,  y: 1.0},
@@ -186,6 +203,7 @@ defmodule QueryTest do
       catch_error(query("SELECT $1::box", [%Postgrex.Box{}]))
   end
 
+  @tag min_crdb_version: nil
   test "decode path", context do
     p1 = %Postgrex.Point{x: 0.0, y: 0.0}
     p2 = %Postgrex.Point{x: 1.0, y: 3.0}
@@ -201,6 +219,7 @@ defmodule QueryTest do
     assert %ArgumentError{} = catch_error(query("SELECT $1::path", [bad_path]))
   end
 
+  @tag min_crdb_version: nil
   test "encode path", context do
     p1 = %Postgrex.Point{x: 0.0, y: 0.0}
     p2 = %Postgrex.Point{x: 1.0, y: 3.0}
@@ -209,12 +228,14 @@ defmodule QueryTest do
     assert [[path]] == query("SELECT $1::path", [path])
   end
 
+  @tag min_crdb_version: nil
   test "decode circle", context do
     center = %Postgrex.Point{x: 1.0, y: -3.5}
     circle = %Postgrex.Circle{center: center, radius: 100.0}
     assert [[circle]] == query("SELECT '<(1.0,-3.5),100.0>'::circle", [])
   end
 
+  @tag min_crdb_version: nil
   test "encode circle", context do
     center = %Postgrex.Point{x: 1.0, y: -3.5}
     circle = %Postgrex.Circle{center: center, radius: 100.0}
@@ -242,15 +263,18 @@ defmodule QueryTest do
     assert [["x"]] == query("SELECT $1::\"char\"", ["x"])
   end
 
+  @tag min_crdb_version: nil
   test "decode record", context do
     assert [[{1, "2"}]] = query("SELECT (1, '2')::composite1", [])
     assert [[[{1, "2"}]]] = query("SELECT ARRAY[(1, '2')::composite1]", [])
   end
 
+  @tag min_crdb_version: nil
   test "decode enum", context do
     assert [["elixir"]] = query("SELECT 'elixir'::enum1", [])
   end
 
+  @tag min_crdb_version: nil
   @tag min_pg_version: "9.2"
   test "decode range", context do
     assert [[%Postgrex.Range{lower: 2, upper: 5, lower_inclusive: true, upper_inclusive: false}]] =
@@ -333,6 +357,7 @@ defmodule QueryTest do
     assert is_number(cmin) and is_number(cmax)
   end
 
+  @tag min_crdb_version: nil
   @tag min_pg_version: "9.0"
   test "hstore copies binaries by default", context do
     # For OTP 20+ refc binaries up to 64 bytes might be copied during a GC
@@ -408,6 +433,7 @@ defmodule QueryTest do
     assert message =~ "Postgrex expected an integer in -2147483648..2147483647"
   end
 
+  @tag min_crdb_version: nil
   @tag min_pg_version: "9.0"
   test "decode hstore", context do
     assert [[%{}]] = query(~s|SELECT ''::hstore|, [])
@@ -541,16 +567,19 @@ defmodule QueryTest do
     assert [[[1, nil, 3]]] = query("SELECT $1::integer[]", [[1, nil, 3]])
   end
 
+  @tag min_crdb_version: nil
   test "encode record", context do
     assert [[{1, "2"}]] = query("SELECT $1::composite1", [{1, "2"}])
     assert [[[{1, "2"}]]] = query("SELECT $1::composite1[]", [[{1, "2"}]])
     assert [[{1, nil, 3}]] = query("SELECT $1::composite2", [{1, nil, 3}])
   end
 
+  @tag min_crdb_version: nil
   test "encode enum", context do
     assert [["elixir"]] = query("SELECT $1::enum1", ["elixir"])
   end
 
+  @tag min_crdb_version: nil
   @tag min_pg_version: "9.2"
   test "encode range", context do
     assert [[%Postgrex.Range{lower: 1, upper: 4, lower_inclusive: true, upper_inclusive: false}]] =
@@ -587,6 +616,7 @@ defmodule QueryTest do
            query("SELECT $1::daterange", [%Postgrex.Range{lower: :unbound, upper: :unbound, lower_inclusive: true, upper_inclusive: true}])
   end
 
+  @tag min_crdb_version: nil
   @tag min_pg_version: "9.2"
   test "encode enforces bounds on integer ranges", context do
     # int4's range is -2147483648 to +2147483647
@@ -905,6 +935,7 @@ defmodule QueryTest do
     assert {:ok, _} = P.query(pid, "SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   @tag min_pg_version: "9.1"
   test "notices", context do
     {:ok, _} = P.query(context.pid, "CREATE TABLE IF NOT EXISTS notices (id int)", [])
@@ -912,6 +943,7 @@ defmodule QueryTest do
     assert [%{message: "relation \"notices\" already exists, skipping"}] = result.messages
   end
 
+  @tag min_crdb_version: nil
   test "notices raised by functions do not reset rows", context do
     assert :ok = query("""
     CREATE FUNCTION raise_notice_and_return(what integer) RETURNS integer AS $$
@@ -952,12 +984,14 @@ defmodule QueryTest do
     end
   end
 
+  @tag min_crdb_version: nil
   test "COPY TO STDOUT", context do
     assert [] = query("COPY uniques TO STDOUT", [])
     assert ["1\t2\n"] = query("COPY (VALUES (1, 2)) TO STDOUT", [])
     assert ["1\t2\n", "3\t4\n"] = query("COPY (VALUES (1, 2), (3, 4)) TO STDOUT", [])
   end
 
+  @tag min_crdb_version: nil
   test "COPY TO STDOUT with decoder_mapper", context do
     opts = [decode_mapper: &String.split/1]
     assert [["1","2"], ["3","4"]] = query("COPY (VALUES (1, 2), (3, 4)) TO STDOUT", [], opts)

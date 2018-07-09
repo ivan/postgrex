@@ -9,6 +9,7 @@ defmodule ClientTest do
     {:ok, [pid: pid, options: opts]}
   end
 
+  @tag min_crdb_version: nil
   test "active client timeout", context do
     conn = context[:pid]
 

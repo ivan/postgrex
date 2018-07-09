@@ -1,9 +1,18 @@
+parse_version = fn version ->
+  destructure [major, minor], String.split(version, ".")
+  {String.to_integer(major), String.to_integer(minor || "0")}
+end
+
 pg_version =
   case System.get_env("PGVERSION") do
     nil -> nil
-    version ->
-      destructure [major, minor], String.split(version, ".")
-      {String.to_integer(major), String.to_integer(minor || "0")}
+    version -> parse_version.(version)
+  end
+
+crdb_version =
+  case System.get_env("CDBVERSION") do
+    nil -> nil
+    version -> parse_version.(version)
   end
 
 pg_flavor =
@@ -29,16 +38,29 @@ else
   []
 end
 
-version_exclusions =
-  if pg_version do
-    [{8, 4}, {9, 0}, {9, 1}, {9, 2}, {9, 3}, {9, 4}, {9, 5}]
-    |> Enum.filter(fn x -> x > pg_version end)
-    |> Enum.map(fn {major, minor} -> {:min_pg_version, "#{major}.#{minor}"} end)
-  else
-    []
-  end
+version_exclusions = case pg_flavor do
+  :postgresql ->
+    [min_pg_version: nil] ++
+    if pg_version do
+      [{8, 4}, {9, 0}, {9, 1}, {9, 2}, {9, 3}, {9, 4}, {9, 5}]
+      |> Enum.filter(fn x -> x > pg_version end)
+      |> Enum.map(fn {major, minor} -> {:min_pg_version, "#{major}.#{minor}"} end)
+    else
+      []
+    end
 
-ExUnit.start exclude: version_exclusions ++ notify_exclude ++ unix_exclude
+  :cockroachdb ->
+    [min_crdb_version: nil] ++
+    if crdb_version do
+      [{2, 1}]
+      |> Enum.filter(fn x -> x > crdb_version end)
+      |> Enum.map(fn {major, minor} -> {:min_crdb_version, "#{major}.#{minor}"} end)
+    else
+      []
+    end
+end
+
+ExUnit.start(exclude: version_exclusions ++ notify_exclude ++ unix_exclude)
 
 {:ok, _} = :application.ensure_all_started(:crypto)
 

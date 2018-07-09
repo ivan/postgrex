@@ -13,13 +13,14 @@ defmodule ErrorTest do
   test "encodes code, detail, table and constraint", config do
     {:error, error} = P.query(config.pid, "insert into uniques values (1), (1);", [])
     message = Exception.message(error)
-    assert message =~ "duplicate key value violates unique constraint"
+    assert message =~ ~r/duplicate key value .*violates unique constraint/
     assert message =~ "table: uniques"
     assert message =~ "constraint: uniques_a_key"
     assert message =~ "ERROR 23505"
   end
 
   @tag min_pg_version: "9.3"
+  @tag min_crdb_version: nil
   test "encodes custom hint", config do
     query = """
     DO language plpgsql $$ BEGIN
@@ -38,7 +39,7 @@ defmodule ErrorTest do
   test "includes query on invalid syntax", config do
     {:error, error} = P.query(config.pid, "SELCT true;", [])
     message = Exception.message(error)
-    assert message =~ "ERROR 42601 (syntax_error) syntax error at or near \"SELCT\""
+    assert message =~ ~r/ERROR 42601 \(syntax_error\) syntax error at or near "SELCT"/i
     assert message =~ "query: SELCT true"
   end
 end

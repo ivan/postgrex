@@ -4,6 +4,8 @@ defmodule TsvectorTest do
   alias Postgrex, as: P
   alias Postgrex.Lexeme
 
+  @moduletag min_crdb_version: nil
+
   setup do
     opts = [database: "postgrex_test", backoff_type: :stop]
     {:ok, pid} = P.start_link(opts)

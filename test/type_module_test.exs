@@ -21,6 +21,7 @@ defmodule TypeModuleTest do
     {:ok, [pid: pid]}
   end
 
+  @tag min_crdb_version: nil
   @tag min_pg_version: "9.0"
   test "hstore references binaries when decode_binary: :reference", context do
     # For OTP 20+ refc binaries up to 64 bytes might be copied during a GC
@@ -32,6 +33,7 @@ defmodule TypeModuleTest do
     assert :binary.referenced_byte_size(value) > byte_size(text)
   end
 
+  @tag min_crdb_version: nil
   test "decode null with custom mapping", context do
     assert [[:custom]] = query("SELECT NULL", [])
     assert [[true, false, :custom]] = query("SELECT true, false, NULL", [])
@@ -41,6 +43,7 @@ defmodule TypeModuleTest do
     assert [[{:custom, true, false}]] = query("SELECT ROW(NULL, true, false)", [])
   end
 
+  @tag min_crdb_version: nil
   test "encode null with custom mapping", context do
     assert [[:custom, :custom]] = query("SELECT $1::text, $2::int", [:custom, :custom])
     assert [[true, false, :custom]] = query("SELECT $1::bool, $2::bool, $3::bool", [true, false, :custom])

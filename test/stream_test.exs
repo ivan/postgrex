@@ -245,6 +245,7 @@ defmodule StreamTest do
     assert {:ok, [1, 2]} == range_x_cast(context.pid, "S1", "S2")
   end
 
+  @tag min_crdb_version: nil
   test "COPY empty TO STDOUT", context do
     query = prepare("", "COPY uniques TO STDOUT")
     transaction(fn(conn) ->
@@ -253,6 +254,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "COPY TO STDOUT", context do
     query1 = prepare("", "COPY (VALUES (1, 2)) TO STDOUT")
     query2 = prepare("", "COPY (VALUES (1, 2), (3, 4)) TO STDOUT")
@@ -273,6 +275,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "COPY TO STDOUT with max_rows splitting", context do
     query1 = prepare("", "COPY (VALUES (1, 2)) TO STDOUT")
     query2 = prepare("", "COPY (VALUES (1, 2), (3, 4)) TO STDOUT")
@@ -295,6 +298,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "COPY TO STDOUT with stream halting before copy done", context do
     query = prepare("", "COPY (VALUES (1, 2), (3, 4)) TO STDOUT")
     assert transaction(fn(conn) ->
@@ -312,6 +316,7 @@ defmodule StreamTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   test "COPY TO STDOUT locks connection", context do
     Process.flag(:trap_exit, true)
 
@@ -335,6 +340,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "stream from COPY FROM STDIN disconnects", context do
     Process.flag(:trap_exit, true)
     query = prepare("", "COPY uniques FROM STDIN")
@@ -349,6 +355,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "COPY empty FROM STDIN", context do
     query = prepare("", "COPY uniques FROM STDIN")
     transaction(fn(conn) ->
@@ -359,6 +366,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "COPY FROM STDIN", context do
     query = prepare("", "COPY uniques FROM STDIN")
     transaction(fn(conn) ->
@@ -395,6 +403,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "COPY FROM STDIN halted", context do
     query = prepare("", "COPY uniques FROM STDIN")
     transaction(fn(conn) ->
@@ -418,6 +427,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "COPY FROM STDIN with savepoint", context do
     query = prepare("", "COPY uniques FROM STDIN")
     transaction(fn(conn) ->
@@ -445,6 +455,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "prepare query and stream into different queries with same name and savepoint", context do
     query42 = prepare("DUPLICATE", "COPY uniques FROM STDIN")
     :ok = close(query42)
@@ -508,6 +519,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "connection forces prepare on COPY FROM after prepare of same name", context do
     query_select = prepare("", "SELECT 42")
     query_copy = prepare("", "COPY uniques FROM STDIN")
@@ -536,6 +548,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "stream into SELECT ignores data", context do
     query = prepare("", "SELECT 42")
     transaction(fn(conn) ->
@@ -550,6 +563,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "stream into COPY TO STDOUT ignores data", context do
     query = prepare("", "COPY (VALUES (1), (2)) TO STDOUT")
     transaction(fn(conn) ->
@@ -564,6 +578,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "connection works after stream into with failure in binding state", context do
     query = prepare("", "insert into uniques values (CAST($1::text AS int))")
 
@@ -586,6 +601,7 @@ defmodule StreamTest do
     assert [[42]] = query("SELECT 42", [])
   end
 
+  @tag min_crdb_version: nil
   test "connection works after stream into failure in executing state", context do
     query = prepare("", "insert into uniques values (1), (1)")
 
@@ -631,6 +647,7 @@ defmodule StreamTest do
     end)
   end
 
+  @tag min_crdb_version: nil
   test "savepoint query", context do
     query_out = prepare("out", "SAVEPOINT streaming_test")
     query_in = prepare("in", query_out.statement)
