@@ -71,7 +71,7 @@ defmodule Postgrex.Types do
           # `unnest` is not supported in redshift or postgres version prior to 8.4
           """
           WHERE t.oid NOT IN (
-            SELECT (ARRAY[#{Enum.join(oids, ",")}])[i]
+            SELECT (ARRAY[#{Enum.join(oids, ",")}]::oid[])[i]
             FROM generate_series(1, #{length(oids)}) AS i
           )
           """
