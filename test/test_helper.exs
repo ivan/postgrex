@@ -88,8 +88,8 @@ CREATE SCHEMA test;
 cmds = [
   ["-c", "DROP DATABASE IF EXISTS postgrex_test;"],
   ["-c", "DROP DATABASE IF EXISTS postgrex_test_with_schemas;"],
-  ["-c", "CREATE DATABASE postgrex_test TEMPLATE=template0 ENCODING='UTF8' LC_COLLATE='en_US.UTF-8' LC_CTYPE='en_US.UTF-8';"],
-  ["-c", "CREATE DATABASE postgrex_test_with_schemas TEMPLATE=template0 ENCODING='UTF8' LC_COLLATE='en_US.UTF-8' LC_CTYPE='en_US.UTF-8';"],
+  ["-c", "CREATE DATABASE postgrex_test TEMPLATE=template0 ENCODING='UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8';"],
+  ["-c", "CREATE DATABASE postgrex_test_with_schemas TEMPLATE=template0 ENCODING='UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8';"],
   ["-d", "postgrex_test", "-c", sql],
   ["-d", "postgrex_test_with_schemas", "-c", sql_with_schemas]
 ]
