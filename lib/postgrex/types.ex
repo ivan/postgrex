@@ -79,13 +79,14 @@ defmodule Postgrex.Types do
 
     """
     SELECT t.oid, t.typname, t.typsend, t.typreceive, t.typoutput, t.typinput,
-           #{typelem}, #{rngsubtype}, ARRAY (
-      SELECT a.atttypid
-      FROM pg_attribute AS a
-      WHERE a.attrelid = t.typrelid AND a.attnum > 0 AND NOT a.attisdropped
-      ORDER BY a.attnum
-    )
+           #{typelem}, #{rngsubtype}, coalesce(atttypids, '{}'::oid[])
     FROM pg_type AS t
+    LEFT JOIN (
+      SELECT attrelid, array_agg(atttypid) AS atttypids
+      FROM pg_attribute
+      WHERE attnum > 0 AND NOT attisdropped
+      GROUP BY 1
+    ) a ON a.attrelid = t.typrelid
     #{join_domain}
     #{join_range}
     #{filter_oids}
