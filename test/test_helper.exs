@@ -132,7 +132,15 @@ cmds =
       cmds ++ postgresql_cmds
 end
 
-psql_env = Map.put_new(System.get_env(), "PGUSER", "postgres")
+superuser = case System.get_env("PGSUPERUSER") do
+  nil ->
+    case pg_flavor do
+      :postgresql  -> "postgres"
+      :cockroachdb -> "root"
+    end
+  user -> user
+end
+psql_env = Map.put_new(System.get_env(), "PGUSER", superuser)
 
 Enum.each(cmds, fn args ->
   {output, status} = System.cmd("psql", args, stderr_to_stdout: true, env: psql_env)
